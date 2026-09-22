@@ -46,6 +46,38 @@ select
 from g
 where ecart_s is not null;
 
+-- name: serie_ingestion.csv
+-- Panneaux « relevés insérés » et « latence » du tableau de bord, par tranche de 5 minutes.
+select
+    to_char(date_trunc('minute', ingested_at)
+            - make_interval(mins => extract(minute from ingested_at)::int % 5),
+            'YYYY-MM-DD HH24:MI') as tranche_5min,
+    count(*) as releves_inseres,
+    count(*) filter (where not is_replay) as releves_temps_reel,
+    round(percentile_cont(0.50) within group (
+        order by case when not is_replay then extract(epoch from ingested_at - last_reported) end)::numeric, 2)
+        as latence_bout_en_bout_p50_s,
+    round(percentile_cont(0.95) within group (
+        order by case when not is_replay then extract(epoch from ingested_at - last_reported) end)::numeric, 2)
+        as latence_bout_en_bout_p95_s,
+    round(percentile_cont(0.95) within group (
+        order by case when not is_replay then extract(epoch from ingested_at - fetched_at) end)::numeric, 3)
+        as latence_pipeline_p95_s
+from raw.station_status
+group by 1
+order by 1;
+
+-- name: serie_vides_pleines.csv
+-- Panneau « part des stations vides et pleines », un point par instantané du flux.
+select
+    to_char(last_reported, 'YYYY-MM-DD HH24:MI:SS') as instantane_utc,
+    count(*) as stations,
+    round(avg(case when is_installed and num_bikes_available = 0 then 1.0 else 0 end), 4) as part_vides,
+    round(avg(case when is_installed and num_docks_available = 0 then 1.0 else 0 end), 4) as part_pleines
+from raw.station_status
+group by 1
+order by 1;
+
 -- name: occupation_par_heure.csv
 select
     to_char(heure_locale, 'YYYY-MM-DD HH24:00') as heure_locale,

@@ -3,6 +3,7 @@ name: ci
 on:
   push:
   pull_request:
+  workflow_dispatch:
 
 jobs:
   python:
@@ -14,7 +15,7 @@ jobs:
       - run: uv run ruff check src tests scripts
       - run: uv run pytest -q
 
-  dbt:
+  dbt-parse:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -27,3 +28,113 @@ jobs:
         env:
           DBT_PROFILES_DIR: .
         run: dbt parse
+
+  pipeline:
+    # Exécution réelle de la pile : le poste de développement n'a pas de moteur Docker utilisable.
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    env:
+      POSTGRES_DB: velomagg
+      POSTGRES_USER: velomagg
+      POSTGRES_PASSWORD: velomagg-ci
+      POSTGRES_PORT: "55432"
+      GRAFANA_ADMIN_PASSWORD: grafana-ci
+      # Le runner a plus de mémoire que le poste : on desserre, le compose local garde ses valeurs.
+      APP_MEM_LIMIT: 512m
+      REDPANDA_MEMORY: 1G
+      REDPANDA_MEM_LIMIT: 1500m
+      POSTGRES_MEM_LIMIT: 768m
+      DBT_MEM_LIMIT: 1g
+      GRAFANA_MEM_LIMIT: 512m
+      # Minutes d'ingestion en direct (le flux publie toutes les 60 s) pour mesurer la latence.
+      MINUTES_TEMPS_REEL: "8"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+
+      - name: Démarrer la pile (une seule commande)
+        run: docker compose up -d --build
+
+      - name: Attendre que les services soient prêts
+        run: |
+          set -e
+          for i in $(seq 1 60); do
+            etat=$(docker compose ps --format '{{.Service}} {{.State}} {{.Health}}')
+            echo "$etat"
+            if echo "$etat" | grep -q 'redpanda running healthy' \
+               && echo "$etat" | grep -q 'postgres running healthy'; then
+              break
+            fi
+            sleep 5
+          done
+          # Les migrations sont un service à exécution unique : on attend sa sortie.
+          for i in $(seq 1 30); do
+            code=$(docker inspect -f '{{.State.ExitCode}}' "$(docker compose ps -aq migrate)" 2>/dev/null || echo "")
+            statut=$(docker inspect -f '{{.State.Status}}' "$(docker compose ps -aq migrate)" 2>/dev/null || echo "")
+            [ "$statut" = "exited" ] && break
+            sleep 5
+          done
+          docker compose logs migrate
+          test "$code" = "0"
+
+      - name: Rejouer l'archive réelle du flux (5,14 h collectées le 22/09/2026)
+        run: |
+          docker compose run --rm -v "$PWD/archive:/app/archive:ro" producer \
+            python -m velomagg.replay archive
+
+      - name: Laisser le consommateur vider la file et le producteur ingérer en direct
+        run: |
+          set -e
+          fin=$(( $(date +%s) + MINUTES_TEMPS_REEL * 60 ))
+          precedent=-1
+          while [ "$(date +%s)" -lt "$fin" ]; do
+            n=$(docker compose exec -T postgres psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -tAc \
+                "select count(*) from raw.station_status" | tr -d '[:space:]')
+            echo "$(date -u +%H:%M:%S) relevés en base : $n"
+            precedent=$n
+            sleep 30
+          done
+          docker compose logs --tail 20 consumer
+
+      - name: Modèles et tests de qualité (dbt build)
+        run: |
+          set -o pipefail
+          mkdir -p results
+          docker compose run --rm dbt dbt source freshness 2>&1 | tee results/dbt_source_freshness.txt || true
+          docker compose run --rm dbt dbt build 2>&1 | tee results/dbt_build.txt
+
+      - name: Tests unitaires Python
+        run: |
+          uv sync --frozen
+          uv run pytest -q 2>&1 | tee results/pytest.txt
+
+      - name: État des conteneurs
+        run: docker compose ps | tee results/docker_compose_ps.txt
+
+      - name: Exporter les chiffres depuis PostgreSQL
+        run: |
+          uv run python scripts/export_results.py
+          uv run --with matplotlib python scripts/figures_pipeline.py
+
+      - name: Chiffres clés du run
+        run: |
+          echo "=== synthese.json" && cat results/synthese.json
+          echo "=== latence.json" && cat results/latence.json
+          echo "=== vides_pleines_global.json" && cat results/vides_pleines_global.json
+          echo "=== instantanes_manques.json" && cat results/instantanes_manques.json
+          echo "=== occupation_par_heure.csv" && cat results/occupation_par_heure.csv
+          echo "=== tests dbt" && grep -E "PASS|FAIL|ERROR|WARN|Done|Completed" results/dbt_build.txt | tail -40
+
+      - name: Journaux en cas d'échec
+        if: failure()
+        run: docker compose logs --tail 100
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: resultats-pipeline
+          path: results/
+
+      - name: Arrêt propre
+        if: always()
+        run: docker compose down

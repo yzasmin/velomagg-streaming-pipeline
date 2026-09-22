@@ -6,7 +6,7 @@ x-app: &app
   build: .
   image: velomagg-app:0.1
   restart: unless-stopped
-  mem_limit: 160m
+  mem_limit: ${APP_MEM_LIMIT:-160m}
   environment:
     KAFKA_BOOTSTRAP: redpanda:9092
     GBFS_ROOT: ${GBFS_ROOT:-https://gbfs.theta.fifteen.eu/gbfs/2.2/montpellier/en}
@@ -23,12 +23,12 @@ services:
       - start
       - --mode=dev-container
       - --smp=1
-      - --memory=512M
+      - --memory=${REDPANDA_MEMORY:-512M}
       - --reserve-memory=0M
       - --overprovisioned
       - --kafka-addr=internal://0.0.0.0:9092
       - --advertise-kafka-addr=internal://redpanda:9092
-    mem_limit: 700m
+    mem_limit: ${REDPANDA_MEM_LIMIT:-700m}
     volumes:
       - redpanda-data:/var/lib/redpanda/data
     healthcheck:
@@ -41,7 +41,7 @@ services:
   postgres:
     image: postgres:16-alpine
     command: ["postgres", "-c", "shared_buffers=64MB", "-c", "max_connections=30", "-c", "timezone=UTC"]
-    mem_limit: 256m
+    mem_limit: ${POSTGRES_MEM_LIMIT:-256m}
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-velomagg}
       POSTGRES_USER: ${POSTGRES_USER:-velomagg}
@@ -84,7 +84,7 @@ services:
   dbt:
     build: ./dbt
     image: velomagg-dbt:0.1
-    mem_limit: 400m
+    mem_limit: ${DBT_MEM_LIMIT:-400m}
     environment:
       DBT_HOST: postgres
       DBT_DB: ${POSTGRES_DB:-velomagg}
@@ -100,7 +100,7 @@ services:
 
   grafana:
     image: grafana/grafana-oss:11.2.2
-    mem_limit: 200m
+    mem_limit: ${GRAFANA_MEM_LIMIT:-200m}
     environment:
       GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-change-moi}
       GF_AUTH_ANONYMOUS_ENABLED: "true"

@@ -7,6 +7,7 @@ Usage : docker compose run --rm -v ./data:/app/data producer python -m velomagg.
 
 from __future__ import annotations
 
+import gzip
 import json
 import logging
 import sys
@@ -21,16 +22,29 @@ from velomagg.producer import ensure_topics
 log = logging.getLogger("replay")
 
 
+def lignes(path: Path):
+    """Lit un fichier JSON Lines, compressé (.gz) ou non."""
+    if path.suffix == ".gz":
+        with gzip.open(path, "rt", encoding="utf-8") as fh:
+            yield from fh
+    else:
+        yield from path.read_text(encoding="utf-8").splitlines()
+
+
+def fichiers(folder: Path, prefixe: str) -> list[Path]:
+    return sorted([*folder.glob(f"{prefixe}_*.jsonl"), *folder.glob(f"{prefixe}_*.jsonl.gz")])
+
+
 def iter_archive(folder: Path):
-    """Produit (topic_logique, message, clé) à partir des fichiers .jsonl d'archive, dans l'ordre."""
-    for path in sorted(folder.glob("station_information_*.jsonl")):
-        for line in path.read_text(encoding="utf-8").splitlines():
+    """Produit (topic_logique, message, clé) à partir des fichiers d'archive, dans l'ordre."""
+    for path in fichiers(folder, "station_information"):
+        for line in lignes(path):
             rec = json.loads(line)
             last_updated, _, stations = feed_envelope(rec["information"])
             for st in stations:
                 yield "information", {**st, "feed_last_updated": last_updated}, str(st["station_id"])
-    for path in sorted(folder.glob("station_status_*.jsonl")):
-        for line in path.read_text(encoding="utf-8").splitlines():
+    for path in fichiers(folder, "station_status"):
+        for line in lignes(path):
             rec = json.loads(line)
             try:
                 last_updated, _, stations = feed_envelope(rec["status"])
