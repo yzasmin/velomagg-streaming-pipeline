@@ -1,0 +1,22 @@
+{
+  "source": "archive brute du flux GBFS (scripts/archive_gbfs.py), pipeline non exécuté",
+  "stations_decrites": 52,
+  "stations_observees": 52,
+  "interrogations": 300,
+  "instantanes_distincts": 299,
+  "interrogations_redondantes": 1,
+  "releves_station": 15548,
+  "debut_utc": "2026-09-22T13:28:47+00:00",
+  "fin_utc": "2026-09-22T18:28:12+00:00",
+  "duree_h": 4.99,
+  "ecart_median_entre_instantanes_s": 60.0,
+  "ecart_max_entre_instantanes_s": 64,
+  "intervalles_superieurs_90s": 0,
+  "age_du_flux_a_la_lecture_median_s": 36.79,
+  "age_du_flux_a_la_lecture_max_s": 60.0,
+  "part_releves_vide": 0.1362,
+  "part_releves_pleine": 0.0,
+  "taux_remplissage_moyen": 0.2519,
+  "capacite_totale": 659,
+  "releves_velos_superieurs_capacite": 0
+}

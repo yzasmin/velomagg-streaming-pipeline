@@ -1,0 +1,12 @@
+velomagg:
+  target: docker
+  outputs:
+    docker:
+      type: postgres
+      host: "{{ env_var('DBT_HOST', 'localhost') }}"
+      port: "{{ env_var('DBT_PORT', '5432') | int }}"
+      user: "{{ env_var('DBT_USER', 'velomagg') }}"
+      password: "{{ env_var('DBT_PASSWORD', 'change-moi') }}"
+      dbname: "{{ env_var('DBT_DB', 'velomagg') }}"
+      schema: analytics
+      threads: 1

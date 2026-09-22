@@ -1,0 +1,126 @@
+# Pipeline complet : `docker compose up -d`
+# Limites mémoire serrées : le projet a été développé sur un poste de 8 Go de RAM.
+name: velomagg
+
+x-app: &app
+  build: .
+  image: velomagg-app:0.1
+  restart: unless-stopped
+  mem_limit: 160m
+  environment:
+    KAFKA_BOOTSTRAP: redpanda:9092
+    GBFS_ROOT: ${GBFS_ROOT:-https://gbfs.theta.fifteen.eu/gbfs/2.2/montpellier/en}
+    POSTGRES_HOST: postgres
+    POSTGRES_DB: ${POSTGRES_DB:-velomagg}
+    POSTGRES_USER: ${POSTGRES_USER:-velomagg}
+    POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change-moi}
+
+services:
+  redpanda:
+    image: docker.redpanda.com/redpandadata/redpanda:v24.2.7
+    command:
+      - redpanda
+      - start
+      - --mode=dev-container
+      - --smp=1
+      - --memory=512M
+      - --reserve-memory=0M
+      - --overprovisioned
+      - --kafka-addr=internal://0.0.0.0:9092
+      - --advertise-kafka-addr=internal://redpanda:9092
+    mem_limit: 700m
+    volumes:
+      - redpanda-data:/var/lib/redpanda/data
+    healthcheck:
+      test: ["CMD-SHELL", "rpk cluster health | grep -E 'Healthy:.+true' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:16-alpine
+    command: ["postgres", "-c", "shared_buffers=64MB", "-c", "max_connections=30", "-c", "timezone=UTC"]
+    mem_limit: 256m
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-velomagg}
+      POSTGRES_USER: ${POSTGRES_USER:-velomagg}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change-moi}
+    ports:
+      - "127.0.0.1:${POSTGRES_PORT:-55432}:5432"
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
+
+  migrate:
+    <<: *app
+    command: ["python", "-m", "velomagg.migrate", "migrations"]
+    restart: "no"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  producer:
+    <<: *app
+    command: ["python", "-m", "velomagg.producer"]
+    depends_on:
+      redpanda:
+        condition: service_healthy
+
+  consumer:
+    <<: *app
+    command: ["python", "-m", "velomagg.consumer"]
+    depends_on:
+      redpanda:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+
+  dbt:
+    build: ./dbt
+    image: velomagg-dbt:0.1
+    mem_limit: 400m
+    environment:
+      DBT_HOST: postgres
+      DBT_DB: ${POSTGRES_DB:-velomagg}
+      DBT_USER: ${POSTGRES_USER:-velomagg}
+      DBT_PASSWORD: ${POSTGRES_PASSWORD:-change-moi}
+      DBT_INTERVAL_S: ${DBT_INTERVAL_S:-900}
+    volumes:
+      - ./dbt:/dbt
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana-oss:11.2.2
+    mem_limit: 200m
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-change-moi}
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
+      GF_ANALYTICS_REPORTING_ENABLED: "false"
+      GF_ANALYTICS_CHECK_FOR_UPDATES: "false"
+      GF_DATE_FORMATS_DEFAULT_TIMEZONE: Europe/Paris
+      PG_DB: ${POSTGRES_DB:-velomagg}
+      PG_USER: ${POSTGRES_USER:-velomagg}
+      PG_PASSWORD: ${POSTGRES_PASSWORD:-change-moi}
+    ports:
+      - "127.0.0.1:${GRAFANA_PORT:-3000}:3000"
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  redpanda-data:
+  pg-data:

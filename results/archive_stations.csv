@@ -1,0 +1,53 @@
+station_id,nom,capacite,nb_releves,part_temps_vide,part_temps_pleine,taux_remplissage_moyen
+030,Charles Flahault,8,299,1.0,0.0,0.0
+050,Parvis Jules Ferry - Gare Saint-Roch,8,299,1.0,0.0,0.0
+049,Tonnelles,8,299,1.0,0.0,0.0
+051,Pont de Lattes - Gare Saint-Roch,12,299,1.0,0.0,0.0
+042,Marie Caizergues,8,299,0.9365,0.0,0.0079
+020,Gambetta,8,299,0.7993,0.0,0.1003
+019,Louis Blanc,16,299,0.4582,0.0,0.0422
+017,Médiathèque Emile Zola,16,299,0.3846,0.0,0.0489
+010,Rondelet,16,299,0.3378,0.0,0.0826
+039,Aiguelongue,8,299,0.107,0.0,0.183
+044,Celleneuve,8,299,0.0502,0.0,0.1526
+005,Corum,12,299,0.0067,0.0,0.1167
+025,Nouveau Saint-Roch,8,299,0.0033,0.0,0.296
+006,Place Albert 1er - St Charles,27,299,0.0,0.0,0.3704
+007,Foch,8,299,0.0,0.0,0.2529
+014,Beaux-Arts,16,299,0.0,0.0,0.0671
+018,Nombre d'Or,16,299,0.0,0.0,0.1844
+032,Prés d'Arènes,8,299,0.0,0.0,0.5
+033,Garcia Lorca,8,299,0.0,0.0,0.375
+040,Jeu de Mail des Abbés,8,299,0.0,0.0,0.329
+041,Euromédecine,8,299,0.0,0.0,0.375
+048,Hôtel du Département,8,299,0.0,0.0,0.2308
+061,Jean de Beins,16,299,0.0,0.0,0.125
+002,Comédie,20,299,0.0,0.0,0.1681
+011,Plan Cabanes,12,299,0.0,0.0,0.444
+012,Boutonnet,12,299,0.0,0.0,0.206
+029,Richter,16,299,0.0,0.0,0.6936
+031,Voltaire,8,299,0.0,0.0,0.7496
+046,Père Soulas,8,299,0.0,0.0,0.4578
+056,Albert 1er - Cathédrale,12,299,0.0,0.0,0.1093
+001,Rue Jules Ferry - Gare Saint-Roch,12,299,0.0,0.0,0.097
+004,Hôtel de Ville,16,299,0.0,0.0,0.2132
+009,Observatoire,8,299,0.0,0.0,0.398
+015,Les Aubes,8,299,0.0,0.0,0.319
+045,Jardin de la Lironde,8,299,0.0,0.0,0.5719
+047,Place Viala,8,299,0.0,0.0,0.125
+043,Sabines,8,299,0.0,0.0,0.2145
+055,Pérols Etang de l'Or,68,299,0.0,0.0,0.3266
+059,Sud De France,8,299,0.0,0.0,0.3069
+013,Emile Combes,8,299,0.0,0.0,0.3219
+016,Antigone centre,12,299,0.0,0.0,0.1449
+021,Port Marianne,16,299,0.0,0.0,0.8091
+023,Les Arceaux,8,299,0.0,0.0,0.125
+024,Cité Mion,8,299,0.0,0.0,0.25
+026,Renouvier,8,299,0.0,0.0,0.125
+034,Vert Bois,16,299,0.0,0.0,0.4569
+035,Malbosc,8,299,0.0,0.0,0.2747
+036,Occitanie,32,299,0.0,0.0,0.1827
+037,Fac des Sciences,24,299,0.0,0.0,0.2138
+038,Fac de Lettres,12,299,0.0,0.0,0.3041
+054,Providence - Ovalie,8,299,0.0,0.0,0.2755
+057,Saint-Guilhem - Courreau,8,299,0.0,0.0,0.375

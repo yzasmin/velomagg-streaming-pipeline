@@ -1,0 +1,84 @@
+{
+ "last_updated": 1790070224,
+ "ttl": 60,
+ "version": "2.2",
+ "data": {
+  "stations": [
+   {
+    "station_id": "006",
+    "name": "Place Albert 1er - St Charles",
+    "lat": 43.616768,
+    "lon": 3.873375,
+    "is_virtual_station": false,
+    "capacity": 27,
+    "vehicle_type_capacity": {
+     "1": 0,
+     "10": 0,
+     "14": 17,
+     "15": 17,
+     "2": 0,
+     "4": 0,
+     "5": 0,
+     "6": 0,
+     "7": 17
+    },
+    "is_valet_station": false,
+    "is_charging_station": false,
+    "rental_uris": {
+     "android": "velomagg://app?sid=st_d3970lrqbce4eg895340",
+     "ios": "velomagg://app?sid=st_d3970lrqbce4eg895340"
+    }
+   },
+   {
+    "station_id": "007",
+    "name": "Foch",
+    "lat": 43.610989,
+    "lon": 3.873345,
+    "is_virtual_station": false,
+    "capacity": 8,
+    "vehicle_type_capacity": {
+     "1": 0,
+     "10": 0,
+     "14": 7,
+     "15": 7,
+     "2": 0,
+     "4": 0,
+     "5": 0,
+     "6": 0,
+     "7": 7
+    },
+    "is_valet_station": false,
+    "is_charging_station": false,
+    "rental_uris": {
+     "android": "velomagg://app?sid=st_d3970lrqbce4eg89534g",
+     "ios": "velomagg://app?sid=st_d3970lrqbce4eg89534g"
+    }
+   },
+   {
+    "station_id": "014",
+    "name": "Beaux-Arts",
+    "lat": 43.616698,
+    "lon": 3.884981,
+    "is_virtual_station": false,
+    "capacity": 16,
+    "vehicle_type_capacity": {
+     "1": 0,
+     "10": 0,
+     "14": 16,
+     "15": 16,
+     "2": 0,
+     "4": 0,
+     "5": 0,
+     "6": 0,
+     "7": 16
+    },
+    "is_valet_station": false,
+    "is_charging_station": false,
+    "rental_uris": {
+     "android": "velomagg://app?sid=st_d3970lrqbce4eg895380",
+     "ios": "velomagg://app?sid=st_d3970lrqbce4eg895380"
+    }
+   }
+  ]
+ }
+}

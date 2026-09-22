@@ -1,0 +1,25 @@
+version: 2
+
+sources:
+  - name: raw
+    description: Tables alimentées par le consommateur Python (migrations dans ../migrations).
+    schema: raw
+    tables:
+      - name: station_status
+        description: Un relevé par station et par valeur de last_reported (doublons écartés à l'insertion).
+        loaded_at_field: ingested_at
+        freshness:
+          warn_after: {count: 5, period: minute}
+          error_after: {count: 15, period: minute}
+        columns:
+          - name: status_id
+            tests: [unique, not_null]
+      - name: station_information
+        description: Description courante de chaque station (upsert).
+        columns:
+          - name: station_id
+            tests: [unique, not_null]
+      - name: ingest_batches
+        description: Un enregistrement par lot écrit par le consommateur.
+      - name: rejected_messages
+        description: Messages refusés par la validation de schéma.

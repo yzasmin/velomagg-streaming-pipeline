@@ -1,0 +1,41 @@
+version: 2
+
+models:
+  - name: dim_station
+    description: Dimension station (description courante).
+    columns:
+      - name: station_id
+        tests: [unique, not_null]
+      - name: capacite
+        tests: [not_null]
+  - name: fct_station_status
+    description: Fait des relevés de disponibilité, un par (station, last_reported). Incrémental.
+    tests:
+      - unique_combinaison:
+          columns: [station_id, last_reported]
+    columns:
+      - name: status_id
+        tests: [unique, not_null]
+      - name: station_id
+        tests:
+          - not_null
+          - relationships: {to: ref('dim_station'), field: station_id}
+      - name: taux_remplissage
+        tests:
+          - accepted_range: {min_value: 0, max_value: 1}
+  - name: agg_occupation_horaire
+    description: Taux de remplissage et part de relevés vides ou pleins, par station et par heure locale.
+    columns:
+      - name: part_releves_vide
+        tests:
+          - accepted_range: {min_value: 0, max_value: 1}
+  - name: agg_reseau_horaire
+    description: Indicateurs réseau par heure locale.
+    columns:
+      - name: heure_locale
+        tests: [unique, not_null]
+  - name: stations_vides_pleines
+    description: Classement des stations par part des relevés vides ou pleins.
+    columns:
+      - name: station_id
+        tests: [unique, not_null]
