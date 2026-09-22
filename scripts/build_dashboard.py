@@ -12,7 +12,8 @@ DS = {"type": "grafana-postgresql-datasource", "uid": "velomagg-pg"}
 
 
 def target(sql: str, fmt: str = "time_series") -> dict:
-    return {"datasource": DS, "editorMode": "code", "format": fmt, "rawQuery": True, "rawSql": sql.strip(), "refId": "A"}
+    return {"datasource": DS, "editorMode": "code", "format": fmt, "rawQuery": True,
+            "rawSql": sql.strip(), "refId": "A"}
 
 
 def stat(pid: int, title: str, sql: str, x: int, unit: str = "short", decimals: int = 0) -> dict:
@@ -20,7 +21,8 @@ def stat(pid: int, title: str, sql: str, x: int, unit: str = "short", decimals: 
         "id": pid, "type": "stat", "title": title, "datasource": DS,
         "gridPos": {"h": 4, "w": 6, "x": x, "y": 0},
         "targets": [target(sql, "table")],
-        "fieldConfig": {"defaults": {"unit": unit, "decimals": decimals, "color": {"mode": "fixed", "fixedColor": "#F2B84B"}},
+        "fieldConfig": {"defaults": {"unit": unit, "decimals": decimals,
+                                     "color": {"mode": "fixed", "fixedColor": "#F2B84B"}},
                         "overrides": []},
         "options": {"reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": False},
                     "colorMode": "value", "graphMode": "none", "textMode": "value"},
@@ -58,7 +60,8 @@ panels = [
         select $__timeGroupAlias(ingested_at, '5m'),
           percentile_cont(0.5) within group (order by extract(epoch from ingested_at - last_reported)) as "p50",
           percentile_cont(0.95) within group (order by extract(epoch from ingested_at - last_reported)) as "p95",
-          percentile_cont(0.95) within group (order by extract(epoch from ingested_at - fetched_at)) as "p95 pipeline seul"
+          percentile_cont(0.95) within group (order by extract(epoch from ingested_at - fetched_at))
+            as "p95 pipeline seul"
         from raw.station_status where $__timeFilter(ingested_at) and not is_replay
         group by 1 order by 1""", {"h": 8, "w": 12, "x": 12, "y": 4}, "s"),
     series(7, "Part des stations vides et pleines", """

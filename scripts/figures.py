@@ -14,8 +14,8 @@ from pathlib import Path
 import matplotlib
 
 matplotlib.use("Agg")
-import matplotlib.dates as mdates  # noqa: E402
-import matplotlib.pyplot as plt  # noqa: E402
+import matplotlib.dates as mdates
+import matplotlib.pyplot as plt
 
 ROOT = Path(__file__).parents[1]
 FOND, TEXTE, ACCENT, SECOND = "#0D0F12", "#ECE8DF", "#F2B84B", "#3FD1BE"
@@ -46,9 +46,9 @@ def figure(largeur: int = 1600, hauteur: int = 900):
 
 def serie_reseau(out: Path) -> None:
     lignes = lire("archive_serie_reseau.csv")
-    t = [datetime.strptime(l["horodatage_local"], "%Y-%m-%d %H:%M:%S") for l in lignes]
-    velos = [int(l["velos_disponibles"]) for l in lignes]
-    vides = [int(l["stations_vides"]) for l in lignes]
+    t = [datetime.strptime(ligne["horodatage_local"], "%Y-%m-%d %H:%M:%S") for ligne in lignes]
+    velos = [int(ligne["velos_disponibles"]) for ligne in lignes]
+    vides = [int(ligne["stations_vides"]) for ligne in lignes]
 
     fig = figure()
     ax = fig.add_subplot(111)
@@ -67,7 +67,7 @@ def serie_reseau(out: Path) -> None:
     ax.set_title("Vélomagg : disponibilité relevée toutes les 60 secondes",
                  color=TEXTE, fontsize=20, pad=18, loc="left")
     lignes_legende = ax.get_lines() + ax2.get_lines()
-    leg = ax.legend(lignes_legende, [l.get_label() for l in lignes_legende], loc="upper right",
+    leg = ax.legend(lignes_legende, [courbe.get_label() for courbe in lignes_legende], loc="upper right",
                     facecolor=FOND, edgecolor="#3A3F46", fontsize=13)
     for texte in leg.get_texts():
         texte.set_color(TEXTE)
@@ -77,9 +77,9 @@ def serie_reseau(out: Path) -> None:
 
 
 def stations_vides(out: Path) -> None:
-    lignes = sorted(lire("archive_stations.csv"), key=lambda l: -float(l["part_temps_vide"]))[:12]
-    noms = [l["nom"][:34] or l["station_id"] for l in lignes][::-1]
-    parts = [float(l["part_temps_vide"]) * 100 for l in lignes][::-1]
+    lignes = sorted(lire("archive_stations.csv"), key=lambda x: -float(x["part_temps_vide"]))[:12]
+    noms = [ligne["nom"][:34] or ligne["station_id"] for ligne in lignes][::-1]
+    parts = [float(ligne["part_temps_vide"]) * 100 for ligne in lignes][::-1]
 
     fig = figure()
     ax = fig.add_subplot(111)
@@ -99,9 +99,9 @@ def stations_vides(out: Path) -> None:
 
 def occupation_horaire(out: Path) -> None:
     lignes = lire("archive_occupation_par_heure.csv")
-    heures = [l["heure_locale"][11:16] for l in lignes]
-    taux = [float(l["taux_remplissage_moyen"]) * 100 for l in lignes]
-    vide = [float(l["part_releves_vide"]) * 100 for l in lignes]
+    heures = [ligne["heure_locale"][11:16] for ligne in lignes]
+    taux = [float(ligne["taux_remplissage_moyen"]) * 100 for ligne in lignes]
+    vide = [float(ligne["part_releves_vide"]) * 100 for ligne in lignes]
 
     fig = figure()
     ax = fig.add_subplot(111)

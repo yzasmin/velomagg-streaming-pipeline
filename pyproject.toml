@@ -29,3 +29,7 @@ pythonpath = ["src"]
 [tool.ruff]
 line-length = 120
 target-version = "py312"
+
+# Règles fixées explicitement pour que la CI et le poste local donnent le même verdict.
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B", "RUF"]

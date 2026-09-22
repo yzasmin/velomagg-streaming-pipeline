@@ -292,7 +292,7 @@
           "editorMode": "code",
           "format": "time_series",
           "rawQuery": true,
-          "rawSql": "select $__timeGroupAlias(ingested_at, '5m'),\n          percentile_cont(0.5) within group (order by extract(epoch from ingested_at - last_reported)) as \"p50\",\n          percentile_cont(0.95) within group (order by extract(epoch from ingested_at - last_reported)) as \"p95\",\n          percentile_cont(0.95) within group (order by extract(epoch from ingested_at - fetched_at)) as \"p95 pipeline seul\"\n        from raw.station_status where $__timeFilter(ingested_at) and not is_replay\n        group by 1 order by 1",
+          "rawSql": "select $__timeGroupAlias(ingested_at, '5m'),\n          percentile_cont(0.5) within group (order by extract(epoch from ingested_at - last_reported)) as \"p50\",\n          percentile_cont(0.95) within group (order by extract(epoch from ingested_at - last_reported)) as \"p95\",\n          percentile_cont(0.95) within group (order by extract(epoch from ingested_at - fetched_at))\n            as \"p95 pipeline seul\"\n        from raw.station_status where $__timeFilter(ingested_at) and not is_replay\n        group by 1 order by 1",
           "refId": "A"
         }
       ],

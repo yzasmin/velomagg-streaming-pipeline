@@ -19,7 +19,8 @@ ROOT = "https://gbfs.theta.fifteen.eu/gbfs/2.2/montpellier/en"
 
 
 def fetch(name: str) -> dict:
-    req = urllib.request.Request(f"{ROOT}/{name}.json", headers={"User-Agent": "velomagg-streaming-pipeline/0.1 (portfolio)"})
+    req = urllib.request.Request(f"{ROOT}/{name}.json",
+                                 headers={"User-Agent": "velomagg-streaming-pipeline/0.1 (portfolio)"})
     with urllib.request.urlopen(req, timeout=20) as resp:
         return json.load(resp)
 
@@ -43,7 +44,7 @@ def main(out: Path) -> None:
             with open(out / f"station_status_{day}.jsonl", "a", encoding="utf-8") as fh:
                 fh.write(json.dumps({"fetched_at": fetched_at, "status": status}) + "\n")
             print(f"{datetime.now(UTC).isoformat()} ok last_updated={status.get('last_updated')}", flush=True)
-        except Exception as exc:  # noqa: BLE001 : on journalise et on continue
+        except Exception as exc:
             print(f"{datetime.now(UTC).isoformat()} erreur {exc}", flush=True)
         time.sleep(max(30, ttl - (time.time() - started)))
 

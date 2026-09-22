@@ -44,7 +44,8 @@ def main() -> None:
             cols = [c.name for c in cur.description]
             rows = [[plain(v) for v in r] for r in cur.fetchall()]
             if name.endswith(".json"):
-                data = dict(zip(cols, rows[0], strict=True)) if len(rows) == 1 else [dict(zip(cols, r, strict=True)) for r in rows]
+                lignes = [dict(zip(cols, r, strict=True)) for r in rows]
+                data = lignes[0] if len(lignes) == 1 else lignes
                 (out / name).write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
             else:
                 with open(out / name, "w", newline="", encoding="utf-8") as fh:

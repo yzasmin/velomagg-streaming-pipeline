@@ -14,7 +14,8 @@ import json
 import statistics
 import sys
 from collections import defaultdict
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta, timezone
+from itertools import pairwise
 from pathlib import Path
 
 ROOT = Path(__file__).parents[1]
@@ -55,7 +56,7 @@ def main(folder: Path) -> None:
         uniques.append((last_updated, fetched_at, stations))
 
     horodatages = sorted(vus)
-    ecarts = [b - a for a, b in zip(horodatages, horodatages[1:], strict=False)]
+    ecarts = [b - a for a, b in pairwise(horodatages)]
     ages = [fetched_at - last_updated for last_updated, fetched_at, _ in uniques]
 
     par_heure = defaultdict(lambda: {"releves": 0, "remplissage": [], "vide": 0, "plein": 0, "stations": set()})
@@ -85,8 +86,8 @@ def main(folder: Path) -> None:
         "instantanes_distincts": len(uniques),
         "interrogations_redondantes": doublons,
         "releves_station": releves,
-        "debut_utc": datetime.fromtimestamp(horodatages[0], timezone.utc).isoformat(),
-        "fin_utc": datetime.fromtimestamp(horodatages[-1], timezone.utc).isoformat(),
+        "debut_utc": datetime.fromtimestamp(horodatages[0], UTC).isoformat(),
+        "fin_utc": datetime.fromtimestamp(horodatages[-1], UTC).isoformat(),
         "duree_h": round((horodatages[-1] - horodatages[0]) / 3600, 2),
         "ecart_median_entre_instantanes_s": statistics.median(ecarts) if ecarts else None,
         "ecart_max_entre_instantanes_s": max(ecarts) if ecarts else None,
@@ -100,7 +101,8 @@ def main(folder: Path) -> None:
         "capacite_totale": sum(int(s.get("capacity", 0)) for s in descriptions.values()),
         "releves_velos_superieurs_capacite": sum(
             1 for _, _, stations in uniques for st in stations
-            if int(st["num_bikes_available"]) > int(descriptions.get(str(st["station_id"]), {}).get("capacity", 10**6))),
+            if int(st["num_bikes_available"])
+            > int(descriptions.get(str(st["station_id"]), {}).get("capacity", 10**6))),
     }
     (out / "archive_synthese.json").write_text(json.dumps(synthese, ensure_ascii=False, indent=2) + "\n",
                                                encoding="utf-8")
