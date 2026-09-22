@@ -1,0 +1,4 @@
+tranche_5min,releves_inseres,releves_temps_reel,latence_bout_en_bout_p50_s,latence_bout_en_bout_p95_s,latence_pipeline_p95_s
+2026-09-22 23:25,16484,104,40.37,40.98,5.435
+2026-09-22 23:30,260,260,39.05,40.99,5.358
+2026-09-22 23:35,104,104,34.07,34.08,0.581

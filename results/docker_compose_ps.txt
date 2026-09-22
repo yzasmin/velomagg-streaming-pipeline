@@ -1,0 +1,7 @@
+NAME                  IMAGE                                               COMMAND                  SERVICE    CREATED         STATUS                   PORTS
+velomagg-consumer-1   velomagg-app:0.1                                    "python -m velomagg.…"   consumer   8 minutes ago   Up 8 minutes             
+velomagg-dbt-1        velomagg-dbt:0.1                                    "sh /dbt/run_loop.sh"    dbt        8 minutes ago   Up 8 minutes             
+velomagg-grafana-1    grafana/grafana-oss:11.2.2                          "/run.sh"                grafana    8 minutes ago   Up 8 minutes             127.0.0.1:3000->3000/tcp
+velomagg-postgres-1   postgres:16-alpine                                  "docker-entrypoint.s…"   postgres   8 minutes ago   Up 8 minutes (healthy)   127.0.0.1:55432->5432/tcp
+velomagg-producer-1   velomagg-app:0.1                                    "python -m velomagg.…"   producer   8 minutes ago   Up 8 minutes             
+velomagg-redpanda-1   docker.redpanda.com/redpandadata/redpanda:v24.2.7   "/entrypoint.sh redp…"   redpanda   8 minutes ago   Up 8 minutes (healthy)   8081-8082/tcp, 9092/tcp, 9644/tcp

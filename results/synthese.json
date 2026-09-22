@@ -1,0 +1,15 @@
+{
+  "stations_decrites": 52,
+  "stations_observees": 52,
+  "debut_collecte": "2026-09-22T23:28:18.878642+00:00",
+  "fin_collecte": "2026-09-22T23:36:18.082730+00:00",
+  "duree_collecte_h": 0.13,
+  "messages_recus": 17264,
+  "messages_statut_valides": 16900,
+  "releves_inseres": 16848,
+  "doublons_ecartes": 52,
+  "messages_invalides": 0,
+  "lots_ecrits": 42,
+  "lignes_station_status": 468,
+  "instantanes_distincts": 9
+}

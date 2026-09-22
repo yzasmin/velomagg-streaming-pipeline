@@ -1,0 +1,18 @@
+ Container velomagg-postgres-1  Running
+ Container velomagg-migrate-1  Recreate
+ Container velomagg-migrate-1  Recreated
+ Container velomagg-postgres-1  Waiting
+ Container velomagg-postgres-1  Healthy
+ Container velomagg-migrate-1  Starting
+ Container velomagg-migrate-1  Started
+[0m23:36:23  Running with dbt=1.8.8
+[0m23:36:23  Registered adapter: postgres=1.8.2
+[0m23:36:24  Found 7 models, 35 data tests, 4 sources, 426 macros
+[0m23:36:24  
+[0m23:36:24  Concurrency: 1 threads (target='docker')
+[0m23:36:24  
+[0m23:36:24  1 of 1 START freshness of raw.station_status ................................... [RUN]
+[0m23:36:24  1 of 1 PASS freshness of raw.station_status .................................... [[32mPASS[0m in 0.02s]
+[0m23:36:24  
+[0m23:36:24  Finished running 1 source in 0 hours 0 minutes and 0.15 seconds (0.15s).
+[0m23:36:24  Done.

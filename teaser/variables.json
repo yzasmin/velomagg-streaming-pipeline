@@ -5,10 +5,10 @@
   "stack1": "Redpanda",
   "stack2": "PostgreSQL",
   "stack3": "dbt",
-  "metricLabel": "Relevés collectés en 5,14 h",
-  "metricValue": "16 016",
-  "metric2Label": "Relevés sans aucun vélo",
-  "metric2Value": "13,56 %",
+  "metricLabel": "Relevés insérés en base",
+  "metricValue": "16 848",
+  "metric2Label": "Tests dbt passés",
+  "metric2Value": "42 / 42",
   "accent": "#F2B84B",
   "figureCaption": "Vélos disponibles sur les 52 stations, relevés toutes les 60 secondes"
 }

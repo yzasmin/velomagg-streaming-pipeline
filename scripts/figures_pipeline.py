@@ -18,6 +18,7 @@ from pathlib import Path
 import matplotlib
 
 matplotlib.use("Agg")
+import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
 
 ROOT = Path(__file__).parents[1]
@@ -90,9 +91,12 @@ def main() -> None:
     style(ax3, "Part des stations vides et pleines, par instantané")
     t3 = [datetime.strptime(r["instantane_utc"], "%Y-%m-%d %H:%M:%S") for r in vides]
     ax3.plot(t3, [float(r["part_vides"]) * 100 for r in vides], color=ACCENT, linewidth=1.6, label="vides")
-    ax3.plot(t3, [float(r["part_pleines"]) * 100 for r in vides], color=SECOND, linewidth=1.6, label="pleines")
+    ax3.plot(t3, [float(r["part_pleines"]) * 100 for r in vides], color=SECOND, linewidth=2.4,
+             linestyle="--", label="pleines (constamment 0)")
     ax3.set_ylabel("%", fontsize=11)
-    ax3.set_ylim(bottom=0)
+    ax3.set_ylim(bottom=-0.6)
+    ax3.xaxis.set_major_locator(mdates.AutoDateLocator(maxticks=7))
+    ax3.xaxis.set_major_formatter(mdates.DateFormatter("%d/%m %Hh"))
     legende(ax3)
 
     ax4 = fig.add_subplot(224)

@@ -4,14 +4,13 @@ Ingestion du flux GBFS temps réel des vélos en libre-service de Montpellier M�
 mise en file dans Redpanda, écriture dédupliquée dans PostgreSQL, modèle analytique dbt, tableau de bord
 Grafana. Tout démarre avec `docker compose up -d`.
 
-> **État d'exécution, à lire avant les chiffres.** Le pipeline complet n'a pas pu être exécuté sur le
-> poste de développement : le moteur Docker Desktop plante au démarrage sur un socket périmé
-> (`removing stale socket: remove <HOME>\AppData\Local\Docker\run\userAnalyticsOtlpHttp.sock: The file
-> cannot be accessed by the system`, trois tentatives, même erreur). Les chiffres publiés plus bas
-> proviennent donc de l'archive brute du flux, collectée en continu pendant la même période par
-> `scripts/archive_gbfs.py`, et non d'une exécution des conteneurs. Les mesures qui n'existent qu'en
-> exécution (latence p50 et p95, sorties de `dbt build`, capture Grafana) sont marquées « non mesurée ».
-> `python -m velomagg.replay data/archive` rejoue l'archive dans le pipeline dès que Docker redémarre.
+> **Où le pipeline a été exécuté.** Le poste de développement n'a pas de moteur Docker utilisable
+> (Docker Desktop plante au démarrage sur un socket périmé : `removing stale socket: remove
+> <HOME>\AppData\Local\Docker\run\userAnalyticsOtlpHttp.sock: The file cannot be accessed by the
+> system`, trois tentatives, même erreur). La pile complète tourne donc dans l'intégration continue
+> GitHub (`.github/workflows/ci.yml`, tâche `pipeline`) : `docker compose up -d`, rejeu de l'archive
+> réelle de 5,14 heures commitée dans `archive/`, ingestion en direct pendant 8 minutes pour mesurer la
+> latence, `dbt build`, `pytest`, export SQL des chiffres et artefact `resultats-pipeline`.
 
 ## Problème
 
@@ -45,35 +44,57 @@ Chaque flèche correspond à un service du `docker-compose.yml` : `producer`, `c
 
 ## Résultats réels
 
-Collecte continue du flux le 22/09/2026, de 13:28:47 UTC à 18:37:15 UTC, soit **5,14 heures**.
-Source des chiffres : `results/archive_synthese.json`, produit par `scripts/analyse_archive.py` à partir
-de l'archive brute (`data/archive/*.jsonl`, non commitée car volumineuse et reproductible).
+Tous les chiffres ci-dessous viennent d'une exécution complète de la pile, le 22/09/2026 :
+**[run CI 35797505264](https://github.com/yzasmin/velomagg-streaming-pipeline/actions/runs/35797505264)**
+(tâche `pipeline`, conclusion `success`). Ils sont produits par des requêtes SQL commitées
+(`sql/resultats.sql`, exécutées par `scripts/export_results.py`) et versionnés dans `results/`.
+
+Deux sources de messages dans ce run : le **rejeu** de l'archive réelle de 5,14 heures collectée le même
+jour (13:28 à 18:37 UTC, `archive/*.jsonl.gz`, 16 432 messages de statut et 312 descriptions) et
+l'**ingestion en direct** du flux pendant les 8 minutes du run, seule base valable pour la latence.
 
 | Mesure | Valeur | Fichier |
 | --- | --- | --- |
-| Stations décrites et observées | 52 | `results/archive_synthese.json` |
-| Capacité totale déclarée | 659 bornes | `results/archive_synthese.json` |
-| Interrogations du flux | 309 | `results/archive_synthese.json` |
-| Instantanés distincts | 308 | `results/archive_synthese.json` |
-| Interrogations redondantes (doublons qu'écarte le pipeline) | 1 | `results/archive_synthese.json` |
-| Relevés de station collectés | 16 016 | `results/archive_synthese.json` |
-| Écart médian entre deux instantanés | 60 s (max 64 s, aucun au-dessus de 90 s) | `results/archive_synthese.json` |
-| Âge du flux au moment de la lecture | médiane 35,9 s, maximum 60,0 s | `results/archive_synthese.json` |
-| Relevés sans aucun vélo | 13,56 % | `results/archive_synthese.json` |
-| Relevés sans aucune borne libre | 0,00 % | `results/archive_synthese.json` |
-| Taux de remplissage moyen | 25,21 % | `results/archive_synthese.json` |
-| Relevés avec plus de vélos que la capacité | 0 | `results/archive_synthese.json` |
-| Tests unitaires Python | 22 passés | sortie de `uv run pytest -q` |
-| Latence p50 et p95 de bout en bout | non mesurée (pipeline non exécuté) | |
-| Résultats de `dbt build` | non mesurés (pipeline non exécuté) | |
+| Messages reçus par le consommateur | 17 264 | `results/synthese.json` |
+| Messages de statut valides | 16 900 | `results/synthese.json` |
+| Relevés insérés en base | 16 848 | `results/synthese.json` |
+| Doublons écartés par la clé unique | 52 | `results/synthese.json` |
+| Messages invalides (schéma) | 0 | `results/synthese.json` |
+| Lots écrits par le consommateur | 42 | `results/synthese.json` |
+| Stations décrites et observées | 52 | `results/synthese.json` |
+| Latence de bout en bout en direct (p50 / p95 / max) | 38,44 s / 40,99 s / 40,99 s | `results/latence.json` |
+| Latence du pipeline seul en direct (p50 / p95) | 2,879 s / 5,431 s | `results/latence.json` |
+| Âge du flux au moment de la lecture (p50) | 34,54 s | `results/latence.json` |
+| Relevés en direct servant à ces latences | 468 (9 instantanés) | `results/synthese.json` |
+| Tests dbt (modèles et qualité) | PASS=42 WARN=0 ERROR=0 SKIP=0 | `results/dbt_build.txt` |
+| Fraîcheur de la source | PASS | `results/dbt_source_freshness.txt` |
+| Tests unitaires Python | 22 passés | `results/pytest.txt` |
+| Relevés sans aucun vélo | 13,59 % | `results/vides_pleines_global.json` |
+| Relevés sans aucune borne libre | 0,00 % | `results/vides_pleines_global.json` |
+| Taux de remplissage moyen | 25,31 % | `results/vides_pleines_global.json` |
+| Relevés avec plus de vélos que la capacité | 0 | `results/vides_pleines_global.json` |
+| Mises à jour manquées pendant le direct | 0 (écart médian 60 s, max 61 s) | `results/instantanes_manques.json` |
+
+Les 52 doublons écartés ne sont pas un hasard : l'archive contient une interrogation redondante, quand le
+flux n'avait pas encore publié d'instantané neuf, soit exactement 52 relevés déjà connus, rejetés par
+`ON CONFLICT (station_id, last_reported) DO NOTHING`. L'écart entre 17 264 messages reçus et 16 900
+statuts valides correspond aux 364 messages de description de stations, comptés séparément.
+
+![Panneaux du tableau de bord, reproduits depuis les données exportées](results/figures/tableau-de-bord.png)
+
+Le débit de ce run ne mesure rien d'intéressant : c'est un rejeu, 16 432 messages injectés d'un coup. Ce
+qui se mesure vraiment, c'est la latence de l'ingestion en direct, 38,4 s en médiane de bout en bout, dont
+34,5 s d'âge du flux avant même la lecture et moins de 6 s pour tout le reste du pipeline au 95e centile,
+et le fait que les 42 tests dbt passent sur 16 848 lignes.
+
+Lecture métier, sur les 5,14 heures de fin d'après-midi rejouées : le réseau n'a jamais dépassé quelques
+dizaines de vélos disponibles simultanément sur 659 bornes, 13,59 % des relevés correspondent à une
+station sans aucun vélo, dont quatre stations vides sur la totalité de la période, et aucune station n'a
+jamais été pleine. Le problème de ce réseau, sur cette tranche horaire, est la pénurie de vélos, pas la
+saturation des bornes. Détail par station dans `results/stations_vides_pleines.csv`, détail horaire dans
+`results/occupation_par_heure.csv`.
 
 ![Disponibilité du réseau minute par minute](results/figures/serie-reseau.png)
-
-Lecture métier : sur ces cinq heures de fin d'après-midi, le réseau n'a jamais dépassé quelques dizaines
-de vélos disponibles simultanément sur 659 bornes, et 13,56 % des relevés correspondent à une station sans
-aucun vélo, dont quatre stations vides sur la totalité de la période. Aucune station n'a jamais été pleine : le problème de ce réseau, sur cette tranche horaire,
-est la pénurie de vélos, pas la saturation des bornes. Le détail par station est dans
-`results/archive_stations.csv`, le détail horaire dans `results/archive_occupation_par_heure.csv`.
 
 ## Reproduire depuis un clone vierge
 
@@ -107,12 +128,23 @@ uv run --with matplotlib python scripts/figures.py
 docker compose down
 ```
 
-Repli sans Docker, pour commencer à collecter tout de suite :
+Rejouer l'archive réelle fournie (5,14 h, 16 432 relevés) plutôt que d'attendre le direct :
+
+```bash
+docker compose run --rm -v "$PWD/archive:/app/archive:ro" producer python -m velomagg.replay archive
+```
+
+Sans Docker du tout, pour au moins collecter le flux :
 
 ```bash
 python scripts/archive_gbfs.py data/archive     # un instantané JSON par minute
 python scripts/analyse_archive.py data/archive  # results/archive_*.json et .csv
 ```
+
+Sans machine locale capable de faire tourner Docker, la pile s'exécute en intégration continue :
+`gh workflow run ci.yml` puis `gh run watch`. La tâche `pipeline` monte le compose, rejoue l'archive,
+ingère le flux en direct 8 minutes, lance `dbt build`, `pytest`, l'export SQL, et publie `results/`
+en artefact.
 
 ## Structure
 
@@ -123,6 +155,7 @@ dbt/                projet dbt : staging, marts, tests génériques, boucle dbt 
 grafana/            source de données et tableau de bord provisionnés (JSON généré par scripts/)
 sql/resultats.sql   requêtes qui produisent les chiffres publiés
 scripts/            archivage brut, analyse d'archive, export des résultats, figures, tableau de bord
+archive/            archive réelle du flux (5,14 h, JSON Lines compressés) rejouable par velomagg.replay
 tests/              tests pytest, avec des captures réelles du flux dans tests/fixtures/
 results/            sorties versionnées (JSON, CSV, PNG)
 ```
@@ -135,28 +168,35 @@ results/            sorties versionnées (JSON, CSV, PNG)
 - Système : `velomagg_montpellier`, opérateur TaM, `ttl` de 60 secondes, 52 stations.
 - Licence annoncée dans `system_information.json` : **ODbL 1.0** (`license_url`
   `https://spdx.org/licenses/ODbL-1.0.html`) ; transport.data.gouv.fr mentionne l'ODbL assortie de
-  conditions particulières d'utilisation. Les données brutes ne sont pas redistribuées dans ce dépôt :
-  seuls les agrégats de `results/` et trois stations d'exemple dans `tests/fixtures/` y figurent.
+  conditions particulières d'utilisation. Le dépôt redistribue, sous cette même licence et avec cette
+  attribution, l'archive de 5,14 heures de `archive/` (nécessaire pour rejouer le pipeline de façon
+  reproductible), ainsi que les agrégats de `results/` et trois stations d'exemple dans `tests/fixtures/`.
 - Le code de ce dépôt est publié sous licence MIT (voir `LICENSE`).
 
 ## Limites
 
-1. **Le pipeline n'a pas été exécuté** : moteur Docker en panne sur le poste (voir l'encadré en tête).
-   Latence, résultats `dbt build` et capture Grafana restent à mesurer ; le code correspondant est écrit,
-   testé unitairement et analysé par `dbt parse`, ce qui ne remplace pas une exécution.
-2. **Durée de collecte courte** : 5 heures d'un mardi après-midi. Aucun effet de pointe du matin, de
-   week-end ni de météo n'est observable ; les agrégats horaires reposent sur six heures locales.
-3. **Latence bornée par la source** : le flux a en médiane 36 secondes au moment où il est lu, jusqu'à
-   60 secondes. Aucun pipeline ne peut faire mieux sur cette source, quelle que soit sa technologie.
-4. **Livraison au moins une fois** : les décalages Kafka sont validés après le COMMIT PostgreSQL, donc un
+1. **Aucune capture du tableau de bord Grafana.** La pile tourne dans un runner sans navigateur, et le
+   poste n'a pas de moteur Docker : impossible d'afficher Grafana pour le photographier. Le service est
+   provisionné et démarre bien (il figure dans `results/docker_compose_ps.txt`), son JSON est commité
+   (`grafana/dashboards/velomagg.json`), et ses quatre panneaux sont reproduits en image à partir des
+   mêmes requêtes SQL par `scripts/figures_pipeline.py`. Ce n'est pas une preuve que Grafana affiche bien
+   ces panneaux, seulement que les données derrière existent.
+2. **Le débit mesuré est celui d'un rejeu**, pas d'un flux en direct : 16 432 messages injectés d'un coup
+   depuis l'archive. Seules les 8 minutes d'ingestion en direct, soit 468 relevés, mesurent une latence.
+3. **Durée de collecte courte** : 5,14 heures d'un mardi après-midi. Aucun effet de pointe du matin, de
+   week-end ni de météo n'est observable ; les agrégats horaires reposent sur sept heures locales.
+4. **Latence bornée par la source** : le flux a 34,5 secondes d'âge en médiane au moment où il est lu,
+   jusqu'à 60 secondes. Aucun pipeline ne peut faire mieux sur cette source, quelle que soit sa technologie.
+5. **Livraison au moins une fois** : les décalages Kafka sont validés après le COMMIT PostgreSQL, donc un
    redémarrage relit le dernier lot ; l'unicité `(station_id, last_reported)` rend l'écriture idempotente,
    mais le compteur de messages reçus peut compter deux fois le même message.
-5. **Machine locale, pas de production** : un seul courtier sans réplication, PostgreSQL sans sauvegarde
-   ni partitionnement (environ 75 000 lignes par jour), Grafana en lecture anonyme sur `localhost`,
-   mots de passe dans un `.env` local. Rien n'est prévu pour un déploiement exposé.
-6. **Pas d'alerte** : les tests de fraîcheur dbt signalent une source figée au prochain `dbt build`, mais
+6. **Pas de production** : un seul courtier sans réplication, PostgreSQL sans sauvegarde ni
+   partitionnement (environ 75 000 lignes par jour), Grafana en lecture anonyme sur `localhost`, mots de
+   passe dans un `.env` local, et des mots de passe jetables en clair dans le workflow CI, qui ne servent
+   qu'à des conteneurs éphémères. Rien n'est prévu pour un déploiement exposé.
+7. **Pas d'alerte** : les tests de fraîcheur dbt signalent une source figée au prochain `dbt build`, mais
    personne n'est prévenu.
-7. **Un seul opérateur, une seule ville** : le modèle suppose la forme du flux Fifteen de Montpellier
+8. **Un seul opérateur, une seule ville** : le modèle suppose la forme du flux Fifteen de Montpellier
    (`capacity` par station, instantané global). Un autre système GBFS demanderait de revérifier ces
    hypothèses, notamment les vélos libres hors station (`free_bike_status`), ignorés ici.
 

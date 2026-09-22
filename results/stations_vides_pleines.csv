@@ -1,0 +1,53 @@
+station_id,nom,capacite,nb_releves,part_temps_vide,part_temps_pleine,taux_remplissage_moyen
+049,Tonnelles,8,324,1.0,0.0,0.0
+051,Pont de Lattes - Gare Saint-Roch,12,324,1.0,0.0,0.0
+050,Parvis Jules Ferry - Gare Saint-Roch,8,324,1.0,0.0,0.0
+030,Charles Flahault,8,324,1.0,0.0,0.0
+042,Marie Caizergues,8,324,0.8642,0.0,0.017
+020,Gambetta,8,324,0.7377,0.0,0.1312
+019,Louis Blanc,16,324,0.5,0.0,0.039
+017,Médiathèque Emile Zola,16,324,0.3827,0.0,0.0513
+010,Rondelet,16,324,0.3117,0.0,0.0858
+039,Aiguelongue,8,324,0.0988,0.0,0.1936
+025,Nouveau Saint-Roch,8,324,0.0802,0.0,0.2731
+044,Celleneuve,8,324,0.0463,0.0,0.1601
+048,Hôtel du Département,8,324,0.0401,0.0,0.2176
+005,Corum,12,324,0.0062,0.0,0.1259
+013,Emile Combes,8,324,0.0,0.0,0.3164
+033,Garcia Lorca,8,324,0.0,0.0,0.3819
+059,Sud De France,8,324,0.0,0.0,0.3025
+055,Pérols Etang de l'Or,68,324,0.0,0.0,0.3313
+037,Fac des Sciences,24,324,0.0,0.0,0.214
+038,Fac de Lettres,12,324,0.0,0.0,0.3004
+032,Prés d'Arènes,8,324,0.0,0.0,0.5035
+041,Euromédecine,8,324,0.0,0.0,0.375
+012,Boutonnet,12,324,0.0,0.0,0.2052
+043,Sabines,8,324,0.0,0.0,0.2172
+061,Jean de Beins,16,324,0.0,0.0,0.125
+016,Antigone centre,12,324,0.0,0.0,0.1443
+001,Rue Jules Ferry - Gare Saint-Roch,12,324,0.0,0.0,0.107
+031,Voltaire,8,324,0.0,0.0,0.7515
+034,Vert Bois,16,324,0.0,0.0,0.4458
+024,Cité Mion,8,324,0.0,0.0,0.25
+023,Les Arceaux,8,324,0.0,0.0,0.1285
+035,Malbosc,8,324,0.0,0.0,0.2797
+015,Les Aubes,8,324,0.0,0.0,0.3233
+021,Port Marianne,16,324,0.0,0.0,0.808
+029,Richter,16,324,0.0,0.0,0.6967
+054,Providence - Ovalie,8,324,0.0,0.0,0.2735
+004,Hôtel de Ville,16,324,0.0,0.0,0.2178
+056,Albert 1er - Cathédrale,12,324,0.0,0.0,0.1114
+006,Place Albert 1er - St Charles,27,324,0.0,0.0,0.3693
+002,Comédie,20,324,0.0,0.0,0.1667
+009,Observatoire,8,324,0.0,0.0,0.3954
+007,Foch,8,324,0.0,0.0,0.2623
+045,Jardin de la Lironde,8,324,0.0,0.0,0.5633
+046,Père Soulas,8,324,0.0,0.0,0.468
+026,Renouvier,8,324,0.0,0.0,0.1285
+047,Place Viala,8,324,0.0,0.0,0.1319
+011,Plan Cabanes,12,324,0.0,0.0,0.4396
+040,Jeu de Mail des Abbés,8,324,0.0,0.0,0.3291
+057,Saint-Guilhem - Courreau,8,324,0.0,0.0,0.3681
+014,Beaux-Arts,16,324,0.0,0.0,0.0716
+018,Nombre d'Or,16,324,0.0,0.0,0.1846
+036,Occitanie,32,324,0.0,0.0,0.179

@@ -1,0 +1,9 @@
+{
+  "n": 468,
+  "bout_en_bout_p50_s": 38.44,
+  "bout_en_bout_p95_s": 40.99,
+  "bout_en_bout_max_s": 40.99,
+  "pipeline_p50_s": 2.879,
+  "pipeline_p95_s": 5.431,
+  "age_flux_a_la_lecture_p50_s": 34.54
+}
