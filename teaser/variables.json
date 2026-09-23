@@ -7,8 +7,8 @@
   "stack3": "dbt",
   "metricLabel": "Relevés insérés en base",
   "metricValue": "16 848",
-  "metric2Label": "Tests dbt passés",
-  "metric2Value": "42 / 42",
+  "metric2Label": "Tests de qualité dbt passés",
+  "metric2Value": "35 / 35",
   "accent": "#F2B84B",
   "figureCaption": "Vélos disponibles sur les 52 stations, relevés toutes les 60 secondes"
 }
