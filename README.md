@@ -66,7 +66,7 @@ l'**ingestion en direct** du flux pendant les 8 minutes du run, seule base valab
 | Latence du pipeline seul en direct (p50 / p95) | 2,879 s / 5,431 s | `results/latence.json` |
 | Âge du flux au moment de la lecture (p50) | 34,54 s | `results/latence.json` |
 | Relevés en direct servant à ces latences | 468 (9 instantanés) | `results/synthese.json` |
-| Tests dbt (modèles et qualité) | PASS=42 WARN=0 ERROR=0 SKIP=0 | `results/dbt_build.txt` |
+| Tests de qualité dbt | 35 réussis sur 35 (le total `PASS=42` de dbt ajoute les 7 modèles construits) | `results/dbt_build.txt` |
 | Fraîcheur de la source | PASS | `results/dbt_source_freshness.txt` |
 | Tests unitaires Python | 22 passés | `results/pytest.txt` |
 | Relevés sans aucun vélo | 13,59 % | `results/vides_pleines_global.json` |
@@ -85,7 +85,9 @@ statuts valides correspond aux 364 messages de description de stations, comptés
 Le débit de ce run ne mesure rien d'intéressant : c'est un rejeu, 16 432 messages injectés d'un coup. Ce
 qui se mesure vraiment, c'est la latence de l'ingestion en direct, 38,4 s en médiane de bout en bout, dont
 34,5 s d'âge du flux avant même la lecture et moins de 6 s pour tout le reste du pipeline au 95e centile,
-et le fait que les 42 tests dbt passent sur 16 848 lignes.
+et le fait que les 35 tests de qualité dbt passent sur 16 848 lignes. Le `PASS=42` affiché par `dbt build`
+n'est pas un nombre de tests : il additionne 35 tests de qualité et 7 modèles construits (2 vues, 4 tables,
+1 modèle incrémental), comme l'indique la ligne `Finished running` de `results/dbt_build.txt`.
 
 Lecture métier, sur les 5,14 heures de fin d'après-midi rejouées : le réseau n'a jamais dépassé quelques
 dizaines de vélos disponibles simultanément sur 659 bornes, 13,59 % des relevés correspondent à une
