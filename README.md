@@ -1,5 +1,9 @@
 # Pipeline streaming des disponibilités Vélomagg (Montpellier)
 
+[![Tests](https://github.com/yzasmin/velomagg-streaming-pipeline/actions/workflows/ci.yml/badge.svg)](https://github.com/yzasmin/velomagg-streaming-pipeline/actions/workflows/ci.yml)
+
+**Fiche détaillée du projet : <https://yzasmin.github.io/projets/data-engineer/>** (portfolio de Yasmina Saoud)
+
 Ingestion du flux GBFS temps réel des vélos en libre-service de Montpellier Méditerranée Métropole,
 mise en file dans Redpanda, écriture dédupliquée dans PostgreSQL, modèle analytique dbt, tableau de bord
 Grafana. Tout démarre avec `docker compose up -d`.
